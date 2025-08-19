@@ -23,10 +23,12 @@
 #include "ray/gcs/store_client/in_memory_store_client.h"
 #include "ray/gcs/tests/gcs_test_util.h"
 #include "ray/gcs/gcs_server/gcs_kv_manager.h"
+#include "ray/observability/ray_event_recorder_interface.h"
 #include "mock/ray/gcs/gcs_server/gcs_kv_manager.h"
 #include "mock/ray/pubsub/publisher.h"
 #include "mock/ray/pubsub/subscriber.h"
 #include "mock/ray/rpc/worker/core_worker_client.h"
+#include "mock/ray/observability/ray_event_recorder_interface.h"
 
 // clang-format on
 
@@ -60,13 +62,16 @@ class GcsJobManagerTest : public ::testing::Test {
           return std::make_shared<rpc::MockCoreWorkerClientConfigurableRunningTasks>(
               address.port());
         });
+    mock_ray_event_recorder_ =
+        std::make_unique<observability::MockRayEventRecorderInterface>();
     gcs_job_manager_ = std::make_unique<gcs::GcsJobManager>(*gcs_table_storage_,
                                                             *gcs_publisher_,
                                                             runtime_env_manager_,
                                                             *function_manager_,
                                                             *fake_kv_,
                                                             io_service_,
-                                                            *worker_client_pool_);
+                                                            *worker_client_pool_,
+                                                            *mock_ray_event_recorder_);
   }
 
   ~GcsJobManagerTest() {
@@ -87,6 +92,7 @@ class GcsJobManagerTest : public ::testing::Test {
   RuntimeEnvManager runtime_env_manager_;
   const std::chrono::milliseconds timeout_ms_{5000};
   std::unique_ptr<gcs::GcsJobManager> gcs_job_manager_;
+  std::unique_ptr<observability::RayEventRecorderInterface> mock_ray_event_recorder_;
 };
 
 TEST_F(GcsJobManagerTest, TestFakeInternalKV) {
@@ -617,7 +623,8 @@ TEST_F(GcsJobManagerTest, TestMarkJobFinishedIdempotency) {
                                      *function_manager_,
                                      *fake_kv_,
                                      io_service_,
-                                     *worker_client_pool_);
+                                     *worker_client_pool_,
+                                     *mock_ray_event_recorder_);
 
   auto job_id = JobID::FromInt(1);
   gcs::GcsInitData gcs_init_data(*gcs_table_storage_);

@@ -130,6 +130,7 @@ ray_cc_test(
     deps = [
         ":gcs_server_test_util",
         "//:ray_mock",
+        "//src/mock/ray/observability:mock_ray_event_recorder",
         "//src/mock/ray/pubsub:mock_publisher",
         "//src/mock/ray/pubsub:mock_subscriber",
         "//src/ray/gcs/gcs_server:gcs_server_lib",
@@ -370,6 +371,7 @@ ray_cc_test(
     deps = [
         ":gcs_server_test_util",
         "//:ray_mock",
+        "//src/mock/ray/observability:mock_ray_event_recorder",
         "//src/mock/ray/pubsub:mock_publisher",
         "//src/ray/gcs/gcs_server:gcs_server_lib",
         "//src/ray/gcs/store_client:in_memory_store_client",

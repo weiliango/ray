@@ -1,0 +1,9 @@
+load("//bazel:ray.bzl", "ray_cc_library")
+
+ray_cc_library(
+    name = "mock_ray_event_recorder",
+    hdrs = ["ray_event_recorder_interface.h"],
+    deps = [
+        "//src/ray/observability:ray_event_recorder_interface",
+    ],
+)
